@@ -4,6 +4,10 @@
 Default is a dry run: it only prints what it would do.
 Pass --apply to actually move files. Only files directly in the
 given folder are moved; subfolders are left alone.
+
+Hidden files (names starting with ".") are skipped, and a file is
+never overwritten: if the target name already exists, a numeric
+suffix (_1, _2, ...) is added.
 """
 
 import argparse
@@ -11,13 +15,28 @@ import shutil
 from pathlib import Path
 
 
+def unique_target(target: Path) -> Path:
+    """Return target, or a numbered variant if it already exists."""
+    if not target.exists():
+        return target
+    stem, suffix = target.stem, target.suffix
+    i = 1
+    while True:
+        candidate = target.with_name(f"{stem}_{i}{suffix}")
+        if not candidate.exists():
+            return candidate
+        i += 1
+
+
 def plan(folder: Path):
     moves = []
     for item in sorted(folder.iterdir()):
         if not item.is_file():
             continue
+        if item.name.startswith("."):
+            continue
         ext = item.suffix.lower().lstrip(".") or "no-extension"
-        target = folder / ext / item.name
+        target = unique_target(folder / ext / item.name)
         if target != item:
             moves.append((item, target))
     return moves
