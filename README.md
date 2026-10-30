@@ -12,6 +12,12 @@ python3 tidy.py ~/Downloads
 
 # Actually move the files
 python3 tidy.py ~/Downloads --apply
+
+# Only tidy .txt files, leaving everything else in place
+python3 tidy.py ~/Downloads --only txt --apply
+
+# Several extensions at once (repeat --only; dot optional, case-insensitive)
+python3 tidy.py ~/Downloads --only .txt --only PNG --apply
 ```
 
 Subfolders are left alone. Files without an extension go into `no-extension/`.
